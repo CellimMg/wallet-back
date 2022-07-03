@@ -17,9 +17,14 @@ function isValidTransaction(transaction) {
 export async function createTransaction(req, res) {
     const transaction = req.body;
     if (!isValidTransaction(transaction)) return res.sendStatus(422);
-    await db.collection("transactions").insertOne(transaction);
+    await db.collection("transactions").insertOne({ ...transaction, value: parseFloat(transaction.value) });
     return res.status(201).send({ message: "sucesso" });
 }
 
+
+export async function readTransactions(_, res) {
+    const transactions = await db.collection("transactions").find().toArray();
+    return res.status(200).send({ transactions: transactions })
+}
 
 

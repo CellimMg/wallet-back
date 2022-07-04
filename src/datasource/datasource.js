@@ -13,6 +13,7 @@ async function connectDB() {
     const mongoClient = new MongoClient(process.env.MONGO);
     await mongoClient.connect();
     db = mongoClient.db("wallet");
+
 }
 
 export { db, objectId, connectDB };

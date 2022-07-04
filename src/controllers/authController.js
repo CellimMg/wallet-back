@@ -2,6 +2,7 @@ import { db } from "../datasource/datasource.js";
 import { v4 as uuid } from 'uuid';
 import bcrypt from "bcrypt";
 import joi from "joi";
+import { ObjectId } from "mongodb";
 
 
 const bodySignUpSchema = joi.object({
@@ -27,6 +28,9 @@ export async function signup(req, res) {
         return res.sendStatus(422);
     }
 
+    const userExist = await db.collection('users').findOne({ email: user.email });
+    if (userExist) return res.sendStatus(409);
+
     await db.collection('users').insertOne({ ...user, password: cryptPass(user.password) });
     res.status(201).send({ message: 'Usuário criado com sucesso' });
 }
@@ -41,10 +45,20 @@ const bodySignInSchema = joi.object({
 
 
 async function storeToken(token, uid) {
-    await db.collection('sessions').insertOne({
-        token,
-        uid: uid
-    });
+    const user = await db.collection('sessions').find({ "uid": new ObjectId(uid) }).toArray();
+    if (user.length === 0) {
+        console.log(token + " " + uid);
+        await db.collection('sessions').insertOne({
+            token: token,
+            uid: uid
+        });
+    } else {
+        await db.collection('sessions').updateOne({ "uid": new ObjectId(uid) }, {
+            "$set": {
+                token: token,
+            }
+        });
+    }
 }
 
 async function getUserWithCredentials(email, password) {

@@ -1,5 +1,6 @@
 import { db } from "../datasource/datasource.js";
 import joi from "joi";
+import { ObjectId } from "mongodb";
 
 const bodyTransaction = joi.object({
     description: joi.string().required(),
@@ -21,8 +22,9 @@ export async function createTransaction(req, res) {
     return res.status(201).send({ message: "sucesso" });
 }
 
-export async function readTransactions(_, res) {
-    const transactions = await db.collection("transactions").find().toArray();
+export async function readTransactions(req, res) {
+    const {uid} = req.body;
+    const transactions = await db.collection("transactions").find({"_id": new ObjectId(uid)}).toArray();
     return res.status(200).send({ transactions: transactions })
 }
 

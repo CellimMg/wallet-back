@@ -7,7 +7,6 @@ const bodyTransaction = joi.object({
     type: joi.string().valid("in", "out").required()
 });
 
-
 function isValidTransaction(transaction) {
     const { error } = bodyTransaction.validate(transaction);
     if (error) return false;
@@ -17,10 +16,10 @@ function isValidTransaction(transaction) {
 export async function createTransaction(req, res) {
     const transaction = req.body;
     if (!isValidTransaction(transaction)) return res.sendStatus(422);
-    await db.collection("transactions").insertOne({ ...transaction, value: parseFloat(transaction.value) });
+    const date = Date.now;
+    await db.collection("transactions").insertOne({ ...transaction, value: parseFloat(transaction.value), date});
     return res.status(201).send({ message: "sucesso" });
 }
-
 
 export async function readTransactions(_, res) {
     const transactions = await db.collection("transactions").find().toArray();

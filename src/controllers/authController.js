@@ -62,8 +62,9 @@ export async function signin(req, res) {
     const user = await getUserWithCredentials(userBody.email, userBody.password);
     if (user) {
         const token = uuid();
+        const {name} = user;
         await storeToken(token, user._id);
-        return res.status(201).send({ token });
+        return res.status(201).send({ token, name });
     } else {
         return res.status(401).send({ message: "Usuário e/ou senha incorretos!" });
     }
